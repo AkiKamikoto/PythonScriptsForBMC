@@ -10,20 +10,46 @@ def compress_image(input_path, output_path, quality=85):
     :param output_path: Путь, куда сохранить сжатое изображение.
     :param quality: Качество сжатого изображения (по умолчанию 85).
     """
-    # Открытие изображения
-    img = Image.open(input_path)
+    try:
+        # Открытие изображения
+        img = Image.open(input_path)
 
-    # Преобразование изображения в формат RGB, если оно в формате RGBA (например, с прозрачным фоном)
-    if img.mode == 'RGBA':
-        img = img.convert('RGB')
+        # Преобразование изображения в формат RGB, если оно в формате RGBA (например, с прозрачным фоном)
+        if img.mode == 'RGBA':
+            img = img.convert('RGB')
 
-    # Сжатие изображения и сохранение
-    img.save(output_path, quality=quality, optimize=True)
+        # Сжатие изображения и сохранение
+        img.save(output_path, quality=quality, optimize=True)
 
-    print(f"Изображение сохранено по пути: {output_path}")
+        print(f"Изображение сохранено по пути: {output_path}")
+    except Exception as e:
+        print(f"Ошибка при обработке {input_path}: {e}")
 
-# Пример использования
-input_image_path = sys.argv[1]  # Замените на путь к вашему изображению
-output_image_path = sys.argv[2]  # Замените на путь для сохранения сжатого изображения
+def compress_images_in_folder(input_folder, output_folder, quality=85):
+    """
+    Сжимает все изображения в указанной папке.
+    
+    :param input_folder: Путь к папке с изображениями.
+    :param output_folder: Путь к папке для сохранения сжатых изображений.
+    :param quality: Качество сжатых изображений (по умолчанию 85).
+    """
+    # Проверяем, существует ли папка для вывода
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
 
-compress_image(input_image_path, output_image_path, quality=70)  # Установите желаемое качество
+    # Проходим по всем файлам в папке
+    for filename in os.listdir(input_folder):
+        input_path = os.path.join(input_folder, filename)
+        
+        # Проверяем, является ли файл изображением (по расширению)
+        if filename.lower().endswith(('png', 'jpg', 'jpeg', 'bmp', 'gif')):
+            output_path = os.path.join(output_folder, filename)
+
+            # Сжимаем изображение
+            compress_image(input_path, output_path, quality)
+
+if __name__ == "__main__":
+    input_folder = sys.argv[1]  # Папка с изображениями
+    output_folder = f"{input_folder}/compressed"  # Папка для сжатых изображений
+
+    compress_images_in_folder(input_folder, output_folder, quality=70)  # Устанавливаем желаемое качество

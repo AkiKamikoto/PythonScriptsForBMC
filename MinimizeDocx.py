@@ -1,5 +1,6 @@
 import zipfile
 import os
+import sys
 from PIL import Image
 from io import BytesIO
 from docx import Document
@@ -55,6 +56,6 @@ def optimize_docx(input_path, output_path):
     print(f"Файл успешно оптимизирован и сохранен как: {output_path}")
 
 # Пример использования
-input_docx = "/Users/daniel/Downloads/my.docx"
-output_docx = "optimized_output.docx"
+input_docx = sys.argv[1]
+output_docx = sys.argv[2]
 optimize_docx(input_docx, output_docx)
