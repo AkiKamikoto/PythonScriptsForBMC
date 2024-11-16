@@ -55,7 +55,26 @@ def optimize_docx(input_path, output_path):
 
     print(f"Файл успешно оптимизирован и сохранен как: {output_path}")
 
-# Пример использования
-input_docx = sys.argv[1]
-output_docx = sys.argv[2]
-optimize_docx(input_docx, output_docx)
+
+def optimize_docx_in_folder(input_folder, output_folder):
+
+    # Проверяем, существует ли папка для вывода
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+
+    # Проходим по всем файлам в папке
+        for filename in os.listdir(input_folder):
+            input_path = os.path.join(input_folder, filename)
+        
+        # Проверяем, является ли файл изображением (по расширению)
+        if filename.lower().endswith(('png', 'jpg', 'jpeg', 'bmp', 'gif')):
+            output_path = os.path.join(output_folder, filename)
+
+            # Сжимаем изображение
+            optimize_docx(input_path, output_path)
+
+
+if __name__ == "__main__":
+    input_docx = sys.argv[1]
+    output_docx = f"{input_docx}/compressed"
+    optimize_docx_in_folder(input_docx, output_docx)

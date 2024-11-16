@@ -10,7 +10,7 @@ def convertToDockx(inputPdf, outputDocx):
     cv.close()
 
 if __name__ == "__main__":
-    input = sys.argv[1]
-    output = sys.argv[2]
+    input_file = sys.argv[1]
+    output_file = f"{input_file}/compressed"
 
-    convertToDockx(input, output)
+    convertToDockx(input_file, output_file)

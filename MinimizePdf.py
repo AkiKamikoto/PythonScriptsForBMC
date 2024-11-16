@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 def compress_pdf(input_folder, output_folder=None, quality='screen'):
     # Если выходная папка не указана, использовать ту же папку
@@ -35,7 +36,23 @@ def compress_pdf(input_folder, output_folder=None, quality='screen'):
             except subprocess.CalledProcessError:
                 print(f"Ошибка сжатия файла {filename}")
 
-# Пример использования
-input_folder = "/Users/daniel/Downloads/testpdf"  # Укажите папку с PDF файлами
-output_folder = f"{input_folder}/compressed"
-compress_pdf(input_folder, output_folder, quality='screen')  # screen, ebook, printer, prepress
+
+def compress_pdf_in_folder(input_folder, output_folder, quality="screen"):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # Проходим по всем файлам в папке
+    for filename in os.listdir(input_folder):
+        input_path = os.path.join(input_folder, filename)
+        
+        # Проверяем, является ли файл pdf 
+        if filename.lower().endswith(('pdf')):
+            output_path = os.path.join(output_folder, filename)
+
+            # Сжимаем pdf
+            compress_pdf(input_path, output_path, quality='screen')
+if __name__ == "__main__":
+    input_folder = sys.argv1[1] # Укажите папку с PDF файлами
+    output_folder = f"{input_folder}/compressed"
+
+    compress_pdf_in_folder(input_folder, output_folder, quality='screen')  # screen, ebook, printer, prepress

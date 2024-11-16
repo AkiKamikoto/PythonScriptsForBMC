@@ -26,13 +26,7 @@ def compress_image(input_path, output_path, quality=85):
         print(f"Ошибка при обработке {input_path}: {e}")
 
 def compress_images_in_folder(input_folder, output_folder, quality=85):
-    """
-    Сжимает все изображения в указанной папке.
-    
-    :param input_folder: Путь к папке с изображениями.
-    :param output_folder: Путь к папке для сохранения сжатых изображений.
-    :param quality: Качество сжатых изображений (по умолчанию 85).
-    """
+
     # Проверяем, существует ли папка для вывода
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
