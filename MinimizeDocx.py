@@ -1,9 +1,21 @@
 import zipfile
 import os
-import sys
+import argparse
 from PIL import Image
 from io import BytesIO
 from docx import Document
+
+# Настройка аргументов командной строки
+parser = argparse.ArgumentParser(
+    description="Скрипт для сжатия docx/word файлов. Для его запуска нужно указать 1 аргумент."
+)
+parser.add_argument(
+    "input_docx",
+    type=str,
+    help="Путь к папке где хранятся word файлы"
+)
+
+args = parser.parse_args()
 
 def compress_image(image_path, output_path, quality=85):
     """
@@ -75,6 +87,6 @@ def optimize_docx_in_folder(input_folder, output_folder):
 
 
 if __name__ == "__main__":
-    input_docx = sys.argv[1]
+    input_docx = args.input_docx
     output_docx = f"{input_docx}/compressed"
     optimize_docx_in_folder(input_docx, output_docx)

@@ -1,6 +1,16 @@
 import os
 import subprocess
-import sys
+import argparse
+
+parser = argparse.ArgumentParser(
+    description="Скрипт для сжатия pdf. Укажите папку с pdf файлами или же сам pdf файл"
+)
+parser.add_argument(
+    "input_folder",
+    type=str,
+    help="Путь к папке с изображениями"
+)
+args = parser.parse_args()
 
 def compress_pdf(input_folder, output_folder=None, quality='screen'):
     # Если выходная папка не указана, использовать ту же папку
@@ -52,7 +62,7 @@ def compress_pdf_in_folder(input_folder, output_folder, quality="screen"):
             # Сжимаем pdf
             compress_pdf(input_path, output_path, quality='screen')
 if __name__ == "__main__":
-    input_folder = sys.argv1[1] # Укажите папку с PDF файлами
+    input_folder = args.input_folder # Укажите папку с PDF файлами
     output_folder = f"{input_folder}/compressed"
 
     compress_pdf_in_folder(input_folder, output_folder, quality='screen')  # screen, ebook, printer, prepress
