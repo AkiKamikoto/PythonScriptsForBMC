@@ -11,13 +11,13 @@
 Сначала клонируйте репозиторий на ваш локальный компьютер с помощью команды:
 
 ```bash
-git clone < https://github.com/AkiKamikoto/PythonScriptsForBMC.git >
+git clone <https://github.com/AkiKamikoto/PythonScriptsForBMC.git>
 ```
 
 Перейдите в папку с проектом:
 
 ```bash
-cd < PYTHONSCRIPTSFORBMC >
+cd <PYTHONSCRIPTSFORBMC>
 ```
 
 ---
@@ -61,18 +61,18 @@ pip install -r requirements.txt
 Чтобы запустить скрипт, необходимо перейти в папку проекта внутри консоли:
 
 ```bash
-cd < PYTHONSCRIPTSFORBMC >
+cd <PYTHONSCRIPTSFORBMC>
 ```
 Далее необходимо запустить скрипт и передать аргументы которые нужны для запуска
 
 ```bash
-python < имя_скрипта >.py < аргумент 1 > < аргумент 2 > < аргумент 3 >
+python <имя_скрипта>.py <аргумент 1> <аргумент 2> <аргумент 3>
 ```
 
 Для того чтобы получить дополнительную информацию по каждому скрипту можете воспользоваться аргументом -h или -help
 
 ```bash
-python3 < имя_скрипта >.py -h
+python3 <имя_скрипта>.py -h
 ```
 
 ---
