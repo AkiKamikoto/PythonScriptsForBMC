@@ -47,31 +47,33 @@ def compress_image(input_path, output_path, quality=85, format=None):
     except Exception as e:
         print(f"Ошибка при обработке {input_path}: {e}")
 
-def compress_images_in_folder(input_folder, output_folder, quality=85, format=None):
+def compress_images_recursively(input_folder, output_folder, quality=85, format=None):
     """
-    Сжимает все изображения в указанной папке и сохраняет их в новой папке.
+    Рекурсивно сжимает все изображения в указанной папке и её подкаталогах.
     :param input_folder: Путь к папке с исходными изображениями.
     :param output_folder: Путь к папке для сжатых изображений.
     :param quality: Качество сжатого изображения (по умолчанию 85).
     :param format: Формат сохранения изображений (по умолчанию сохраняется в исходном формате).
     """
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    for root, _, files in os.walk(input_folder):
+        for filename in files:
+            if filename.lower().endswith(('png', 'jpg', 'jpeg', 'bmp', 'gif')):
+                input_path = os.path.join(root, filename)
 
-    for filename in os.listdir(input_folder):
-        input_path = os.path.join(input_folder, filename)
+                # Создаём структуру папок в выходной директории
+                relative_path = os.path.relpath(root, input_folder)
+                output_subfolder = os.path.join(output_folder, relative_path)
+                os.makedirs(output_subfolder, exist_ok=True)
 
-        # Проверяем, является ли файл изображением (по расширению)
-        if filename.lower().endswith(('png', 'jpg', 'jpeg', 'bmp', 'gif')):
-            base_filename, _ = os.path.splitext(filename)
-            extension = f".{format}" if format else os.path.splitext(filename)[1]
-            output_path = os.path.join(output_folder, f"{base_filename}{extension}")
+                base_filename, _ = os.path.splitext(filename)
+                extension = f".{format}" if format else os.path.splitext(filename)[1]
+                output_path = os.path.join(output_subfolder, f"{base_filename}{extension}")
 
-            compress_image(input_path, output_path, quality, format)
-        else:
-            print(f"Пропущен файл (не изображение): {filename}")
+                compress_image(input_path, output_path, quality, format)
+            else:
+                print(f"Пропущен файл (не изображение): {filename}")
 
 if __name__ == "__main__":
     input_folder = args.input_folder
     output_folder = os.path.join(input_folder, "compressed")
-    compress_images_in_folder(input_folder, output_folder, quality=70, format=args.format)
+    compress_images_recursively(input_folder, output_folder, quality=70, format=args.format)
