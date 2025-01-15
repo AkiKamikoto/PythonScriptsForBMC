@@ -3,90 +3,97 @@ import os
 import argparse
 from PIL import Image
 from io import BytesIO
-from docx import Document
+import shutil
 
-# Настройка аргументов командной строки
-parser = argparse.ArgumentParser(
-    description="Скрипт для сжатия docx/word файлов. Для его запуска нужно указать 1 аргумент."
-)
-parser.add_argument(
-    "input_docx",
-    type=str,
-    help="Путь к папке где хранятся word файлы"
-)
 
-args = parser.parse_args()
-
-def compress_image(image_path, output_path, quality=85):
+def compress_image(image_path, quality=85):
     """
     Сжать изображение до указанного качества.
     """
-    with Image.open(image_path) as img:
-        img = img.convert('RGB')
-        img.save(output_path, format='JPEG', quality=quality, optimize=True)
+    try:
+        with Image.open(image_path) as img:
+            img = img.convert('RGB')
+            buffer = BytesIO()
+            img.save(buffer, format='JPEG', quality=quality, optimize=True)
+            buffer.seek(0)
+            with open(image_path, "wb") as f:
+                f.write(buffer.read())
+    except Exception as e:
+        print(f"Ошибка при сжатии изображения {image_path}: {e}")
+
 
 def optimize_docx(input_path, output_path):
     """
     Оптимизирует .docx файл, сжимая изображения.
     """
-    # Временная папка для извлечения содержимого .docx
     temp_dir = "temp_docx"
+    
+    # Очистка и создание временной папки
     if os.path.exists(temp_dir):
-        os.rmdir(temp_dir)
+        shutil.rmtree(temp_dir)
     os.mkdir(temp_dir)
 
-    # Открытие .docx файла как zip-архива
-    with zipfile.ZipFile(input_path, 'r') as docx:
-        docx.extractall(temp_dir)
+    try:
+        # Распаковка .docx как zip-архива
+        with zipfile.ZipFile(input_path, 'r') as docx:
+            docx.extractall(temp_dir)
 
-    # Обработка всех изображений в директории с содержимым .docx
-    for root, dirs, files in os.walk(temp_dir):
-        for file in files:
-            if file.lower().endswith(('png', 'jpg', 'jpeg', 'gif', 'bmp')):
-                img_path = os.path.join(root, file)
-                compressed_img_path = img_path + "_compressed.jpg"
-                compress_image(img_path, compressed_img_path)
-                
-                # Заменить оригинальное изображение на сжатое
-                os.replace(compressed_img_path, img_path)
-
-    # Создание нового .docx файла с оптимизированными изображениями
-    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as docx_out:
-        for root, dirs, files in os.walk(temp_dir):
+        # Обработка изображений
+        for root, _, files in os.walk(temp_dir):
             for file in files:
-                docx_out.write(os.path.join(root, file),
-                               os.path.relpath(os.path.join(root, file), temp_dir))
+                if file.lower().endswith(('png', 'jpg', 'jpeg', 'gif', 'bmp')):
+                    img_path = os.path.join(root, file)
+                    compress_image(img_path)
 
-    # Удалить временную директорию
-    for root, dirs, files in os.walk(temp_dir, topdown=False):
-        for file in files:
-            os.remove(os.path.join(root, file))
-        for dir in dirs:
-            os.rmdir(os.path.join(root, dir))
-    os.rmdir(temp_dir)
+        # Сборка нового .docx файла
+        with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as docx_out:
+            for root, _, files in os.walk(temp_dir):
+                for file in files:
+                    full_path = os.path.join(root, file)
+                    archive_name = os.path.relpath(full_path, temp_dir)
+                    docx_out.write(full_path, archive_name)
 
-    print(f"Файл успешно оптимизирован и сохранен как: {output_path}")
+        print(f"Файл успешно оптимизирован: {output_path}")
+    except Exception as e:
+        print(f"Ошибка при обработке файла {input_path}: {e}")
+    finally:
+        # Очистка временной папки
+        shutil.rmtree(temp_dir)
 
 
 def optimize_docx_in_folder(input_folder, output_folder):
+    """
+    Оптимизировать все .docx файлы в папке.
+    """
+    if not os.path.exists(input_folder):
+        print(f"Папка {input_folder} не существует.")
+        return
 
-    # Проверяем, существует ли папка для вывода
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
 
-    # Проходим по всем файлам в папке
-        for filename in os.listdir(input_folder):
+    for filename in os.listdir(input_folder):
+        if filename.lower().endswith('.docx'):
             input_path = os.path.join(input_folder, filename)
-        
-        # Проверяем, является ли файл изображением (по расширению)
-        if filename.lower().endswith(('png', 'jpg', 'jpeg', 'bmp', 'gif')):
             output_path = os.path.join(output_folder, filename)
-
-            # Сжимаем изображение
-            optimize_docx(input_path, output_path)
+            try:
+                optimize_docx(input_path, output_path)
+            except Exception as e:
+                print(f"Ошибка при обработке {filename}: {e}")
 
 
 if __name__ == "__main__":
-    input_docx = args.input_docx
-    output_docx = f"{input_docx}/compressed"
-    optimize_docx_in_folder(input_docx, output_docx)
+    parser = argparse.ArgumentParser(
+        description="Скрипт для сжатия изображений внутри .docx файлов в указанной папке."
+    )
+    parser.add_argument(
+        "input_folder",
+        type=str,
+        help="Путь к папке, где хранятся .docx файлы"
+    )
+    args = parser.parse_args()
+
+    input_folder = args.input_folder
+    output_folder = os.path.join(input_folder, "compressed")
+    
+    optimize_docx_in_folder(input_folder, output_folder)
